@@ -8,7 +8,8 @@ import (
 )
 
 func main() {
-	checkPrint(10000, 10, 100, 10, 100)
+	checkPrint(10000, 10, 100, 10, 100, 10) //maxCardNumber, maxNumberOfItems, maxItemId,
+	//oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount
 }
 
 func cardNumberGeneration(maxNumber int) int {
@@ -36,13 +37,17 @@ func priceGeneration(maxOneItemPrice int) float64 {
 	return float64(maxOneItemPrice) * rand.Float64()
 }
 
-func checkPrint(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice int) {
+func promotion(promotionDiscount int) float64 {
+	return float64(promotionDiscount) / float64(100)
+}
+
+func checkPrint(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount int) {
 	cardNumber := cardNumberGeneration(maxCardNumber)
 	discount := discountGeneration(cardNumber)
 
-	fmt.Println("_______________________________________________")
-	fmt.Printf("|%2s | %10s | %s| %s| %s|\n", "№", "ItemId", "Quantity", "Price", "Total Price")
-	fmt.Println("_______________________________________________")
+	fmt.Println("________________________________________________________")
+	fmt.Printf("|%2s | %10s | %s| %s| %s| %s|\n", "№", "ItemId", "Quantity", "Price", "Total Price", "Promotion Discount")
+	fmt.Println("________________________________________________________")
 	reverseCounter := numberOfItemsInCheck(maxNumberOfItems)
 	itemCounter := 1
 	var total float64
@@ -52,6 +57,13 @@ func checkPrint(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, 
 		quantity := itemQuantityGeneration(oneItemMaxQuantity)
 		oneItemPrice := priceGeneration(oneItemMaxPrice)
 		oneItemTotal := float64(quantity) * oneItemPrice
+		if itemCounter%2 != 0 {
+			oneItemTotal = oneItemTotal - oneItemTotal*promotion(promotionDiscount)
+			fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f| %5.2f|\n",
+				itemCounter, id, quantity, oneItemPrice, oneItemTotal,
+				oneItemTotal*promotion(promotionDiscount))
+		}
+
 		fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f|\n", itemCounter, id, quantity, oneItemPrice, oneItemTotal)
 		total += oneItemTotal
 		toBePaid = total - (total * discount)
@@ -63,15 +75,15 @@ func checkPrint(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, 
 		itemCounter++
 
 	}
-	fmt.Println("_______________________________________________")
+	fmt.Println("________________________________________________________")
 	fmt.Printf("|Total: %.2f %32s\n", total, "|")
-	fmt.Println("_______________________________________________")
+	fmt.Println("________________________________________________________")
 	fmt.Printf("|Discount card: %d %27s\n", cardNumber, "|")
-	fmt.Println("_______________________________________________")
+	fmt.Println("________________________________________________________")
 	fmt.Printf("|Discount: %.0f%s %34s\n", discount*100, "%", "|")
-	fmt.Println("_______________________________________________")
+	fmt.Println("________________________________________________________")
 	fmt.Printf("|To be paid: %.2f; Saved: %.2f %14s\n", toBePaid, total-toBePaid, "|")
-	fmt.Println("_______________________________________________")
+	fmt.Println("________________________________________________________")
 }
 
 func discountGeneration(cardNumber int) float64 {
