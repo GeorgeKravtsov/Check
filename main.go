@@ -3,13 +3,69 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 )
 
 func main() {
-	checkPrint(10000, 10, 100, 10, 100, 10) //maxCardNumber, maxNumberOfItems, maxItemId,
-	//oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount
+	maxCardNumber, maxNumberOfItems, maxItemId,
+		oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount := getUserInput()
+	checkPrint(maxCardNumber, maxNumberOfItems, maxItemId,
+		oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount)
+}
+
+func getUserInput() (int, int, int, int, int, int) {
+	var input string
+	fmt.Print("Enter maximum discount card number (10000 for example): ")
+	fmt.Scanf("%s", &input)
+	maxCardNumber, err := strconv.Atoi(input)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Maximum discount number is:", maxCardNumber)
+	}
+	fmt.Print("Enter maximum number of items (10 for example): ")
+	fmt.Scanf("%s", &input)
+	maxNumberOfItems, err := strconv.Atoi(input)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Maximum number of items is:", maxNumberOfItems)
+	}
+	fmt.Print("Enter maximum item ID (100 for example): ")
+	fmt.Scanf("%s", &input)
+	maxItemId, err := strconv.Atoi(input)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Maximum item ID is:", maxItemId)
+	}
+	fmt.Print("Enter maximum quantity of one item (10 for example): ")
+	fmt.Scanf("%s", &input)
+	oneItemMaxQuantity, err := strconv.Atoi(input)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Maximum one item quantity is:", oneItemMaxQuantity)
+	}
+	fmt.Print("Enter maximum price of one item: (100 for example) ")
+	fmt.Scanf("%s", &input)
+	oneItemMaxPrice, err := strconv.Atoi(input)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("One item maximum price is:", oneItemMaxPrice)
+	}
+	fmt.Print("Enter promotion discount (10 for exmple): ")
+	fmt.Scanf("%s", &input)
+	promotionDiscount, err := strconv.Atoi(input)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Promotion discount is:", promotionDiscount)
+	}
+	return maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount
 }
 
 func cardNumberGeneration(maxNumber int) int {
