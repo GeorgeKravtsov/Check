@@ -9,10 +9,10 @@ import (
 )
 
 func main() {
-	maxCardNumber, maxNumberOfItems, maxItemId,
-		oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount := getUserInput()
-	checkPrint(maxCardNumber, maxNumberOfItems, maxItemId,
-		oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount)
+	//	maxCardNumber, maxNumberOfItems, maxItemId,
+	//		oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount := getUserInput()
+	printReceipt(10000, 10, 100, 10, 100, 10) //maxCardNumber, maxNumberOfItems, maxItemId,
+	//oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount
 }
 
 func getUserInput() (int, int, int, int, int, int) {
@@ -83,7 +83,7 @@ func itemQuantityGeneration(maxQuantity int) int {
 	return 1 + rand.Intn(maxQuantity)
 }
 
-func numberOfItemsInCheck(number int) int {
+func numberOfItemsInReceipt(number int) int {
 	rand.Seed(time.Now().UnixNano())
 	return 1 + rand.Intn(number)
 }
@@ -97,18 +97,18 @@ func promotion(promotionDiscount int) float64 {
 	return float64(promotionDiscount) / float64(100)
 }
 
-func checkPrint(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount int) {
+func printReceipt(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount int) {
 	cardNumber := cardNumberGeneration(maxCardNumber)
 	discount := discountGeneration(cardNumber)
 
 	fmt.Println("________________________________________________________")
 	fmt.Printf("|%2s | %10s | %s| %s| %s| %s|\n", "№", "ItemId", "Quantity", "Price", "Total Price", "Promotion Discount")
 	fmt.Println("________________________________________________________")
-	reverseCounter := numberOfItemsInCheck(maxNumberOfItems)
+	reverseCounter := numberOfItemsInReceipt(maxNumberOfItems)
 	itemCounter := 1
 	var total float64
 	var toBePaid float64
-	for {
+	for i := reverseCounter; i > 0; i-- {
 		id := itemIdGeneration(maxItemId)
 		quantity := itemQuantityGeneration(oneItemMaxQuantity)
 		oneItemPrice := priceGeneration(oneItemMaxPrice)
@@ -118,18 +118,16 @@ func checkPrint(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, 
 			fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f| %5.2f|\n",
 				itemCounter, id, quantity, oneItemPrice, oneItemTotal,
 				oneItemTotal*promotion(promotionDiscount))
+			total += oneItemTotal
+			itemCounter++
+			continue
 		}
 
-		fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f|\n", itemCounter, id, quantity, oneItemPrice, oneItemTotal)
+		fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f|\n", itemCounter, id, quantity,
+			oneItemPrice, oneItemTotal)
 		total += oneItemTotal
 		toBePaid = total - (total * discount)
-		if reverseCounter <= 0 {
-			break
-		}
-
-		reverseCounter--
 		itemCounter++
-
 	}
 	fmt.Println("________________________________________________________")
 	fmt.Printf("|Total: %.2f %32s\n", total, "|")
