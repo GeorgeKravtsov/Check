@@ -97,6 +97,8 @@ func promotion(promotionDiscount int) float64 {
 	return float64(promotionDiscount) / float64(100)
 }
 
+
+
 func printReceipt(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount int) {
 	cardNumber := cardNumberGeneration(maxCardNumber)
 	discount := discountGeneration(cardNumber)
@@ -113,21 +115,29 @@ func printReceipt(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity
 		quantity := itemQuantityGeneration(oneItemMaxQuantity)
 		oneItemPrice := priceGeneration(oneItemMaxPrice)
 		oneItemTotal := float64(quantity) * oneItemPrice
-		if itemCounter%2 != 0 {
-			oneItemTotal = oneItemTotal - oneItemTotal*promotion(promotionDiscount)
+		switch itemCounter != 0 {
+		case itemCounter == 1:
+			oneItemTotal = oneItemPrice * float64(quantity)
+			total += oneItemTotal
+			toBePaid = total - (total * discount)
+			fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f|\n",
+				itemCounter, id, quantity, oneItemPrice, oneItemTotal)
+			itemCounter++
+		case itemCounter != 1 && itemCounter%2 != 0:
+			total += oneItemTotal - oneItemTotal*promotion(promotionDiscount)
 			fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f| %5.2f|\n",
 				itemCounter, id, quantity, oneItemPrice, oneItemTotal,
 				oneItemTotal*promotion(promotionDiscount))
-			total += oneItemTotal
+			toBePaid = total - (total * discount)
 			itemCounter++
 			continue
+		default:
+			fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f|\n", itemCounter, id, quantity,
+				oneItemPrice, oneItemTotal)
+			total += oneItemTotal
+			toBePaid = total - (total * discount)
+			itemCounter++
 		}
-
-		fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f|\n", itemCounter, id, quantity,
-			oneItemPrice, oneItemTotal)
-		total += oneItemTotal
-		toBePaid = total - (total * discount)
-		itemCounter++
 	}
 	fmt.Println("________________________________________________________")
 	fmt.Printf("|Total: %.2f %32s\n", total, "|")
