@@ -10,20 +10,21 @@ import (
 
 func main() {
 
-	maxCardNumber := getUserInput("Enter maximum discount card number (10000 for example) ",
-					"Maximum discount number is:")
-	maxNumberOfItems := getUserInput("Enter maximum number of items (10 for example): ",
-					"Maximum number of items is:")
-	maxItemId := getUserInput("Enter maximum item ID (100 for example): ", "Maximum item ID is:")
-	oneItemMaxQuantity := getUserInput("Enter maximum quantity of one item (10 for example): ",
-					"Maximum one item quantity is:")
-	oneItemMaxPrice := getUserInput("Enter maximum price of one item: (100 for example) ",
-					"One item maximum price is:")
-	promotionDiscount := getUserInput("Enter promotion discount (10 for exmple): ",
-					"Promotion discount is:")
+	//	maxCardNumber := getUserInput("Enter maximum discount card number (10000 for example) ",
+	//					"Maximum discount number is:")
+	//	maxNumberOfItems := getUserInput("Enter maximum number of items (10 for example): ",
+	//					"Maximum number of items is:")
+	//	maxItemId := getUserInput("Enter maximum item ID (100 for example): ", "Maximum item ID is:")
+	//	oneItemMaxQuantity := getUserInput("Enter maximum quantity of one item (10 for example): ",
+	//					"Maximum one item quantity is:")
+	//	oneItemMaxPrice := getUserInput("Enter maximum price of one item: (100 for example) ",
+	//					"One item maximum price is:")
+	//	promotionDiscount := getUserInput("Enter promotion discount (10 for exmple): ",
+	//					"Promotion discount is:")
 
-	printReceipt(maxCardNumber, maxNumberOfItems, maxItemId,
-		oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount) //10000, 10, 100, 10, 100, 10
+	printReceiptPrototype(10000, 10, 100, 10, 100, 10) //maxCardNumber, maxNumberOfItems,
+	//maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount
+	//	printReceipt(newReceipt(10000, 10, 100, 10, 100, 10))
 
 }
 
@@ -69,44 +70,97 @@ func promotion(promotionDiscount int) float64 {
 	return float64(promotionDiscount) / float64(100)
 }
 
-func printReceipt(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount int) {
+func isOddNumber(number int) bool {
+	if number%2 != 0 {
+		return true
+	}
+	return false
+}
+
+type oneItemLine struct {
+	number       int
+	itemId       int
+	quantity     int
+	price        float64
+	numberIsOdd  bool
+	oneItemTotal float64
+}
+
+func newOneItemLine(number, maxItemId, oneItemMaxQuantity, oneItemMaxPrice int) oneItemLine {
+	numberIsOdd := isOddNumber(number)
+	quantity := itemQuantityGeneration(oneItemMaxQuantity)
+	price := priceGeneration(oneItemMaxPrice)
+	oneItemTotal := float64(quantity) * price
+	return oneItemLine{number: number, itemId: itemIdGeneration(maxItemId), quantity: quantity, price: price, numberIsOdd: numberIsOdd, oneItemTotal: oneItemTotal}
+}
+
+func getSliceOfLines(maxItemNumber, maxItemId, oneItemMaxQuantity, oneItemMaxPrice int) []oneItemLine {
+	numberOfItems := numberOfItemsInReceipt(maxItemNumber)
+	sliceOfLines := make([]oneItemLine, numberOfItems)
+	for number := 1; number <= numberOfItems; number++ {
+		sliceOfLines = append(sliceOfLines, newOneItemLine(number, maxItemId, oneItemMaxQuantity, oneItemMaxPrice))
+	}
+	return sliceOfLines
+}
+
+type receipt struct {
+	cardNumber   int
+	discount     float64
+	sliceOfLines []oneItemLine
+	promDiscount float64
+}
+
+func newReceipt(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount int) receipt {
+	cardNumber := cardNumberGeneration(maxCardNumber)
+	discount := discountGeneration(cardNumber)
+	return receipt{cardNumber: cardNumber, discount: discount, sliceOfLines: getSliceOfLines(maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice), promDiscount: promotion(promotionDiscount)}
+}
+
+func printReceipt(rec receipt) {
+	for _, line := range rec.sliceOfLines {
+		if line.number != 0 {
+			fmt.Println(line)
+		}
+	}
+	fmt.Println(rec.cardNumber)
+	fmt.Println(rec.discount)
+	fmt.Println(rec.promDiscount)
+}
+
+func printReceiptPrototype(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount int) {
 	cardNumber := cardNumberGeneration(maxCardNumber)
 	discount := discountGeneration(cardNumber)
 
 	fmt.Println("________________________________________________________")
 	fmt.Printf("|%2s | %10s | %s| %s| %s| %s|\n", "№", "ItemId", "Quantity", "Price", "Total Price", "Promotion Discount")
 	fmt.Println("________________________________________________________")
-	reverseCounter := numberOfItemsInReceipt(maxNumberOfItems)
-	itemCounter := 1
+	numberOfItems := numberOfItemsInReceipt(maxNumberOfItems)
 	var total float64
 	var toBePaid float64
-	for i := reverseCounter; i > 0; i-- {
+	for number := 1; number <= numberOfItems; number++ {
 		id := itemIdGeneration(maxItemId)
 		quantity := itemQuantityGeneration(oneItemMaxQuantity)
 		oneItemPrice := priceGeneration(oneItemMaxPrice)
 		oneItemTotal := float64(quantity) * oneItemPrice
-		switch itemCounter != 0 {
-		case itemCounter == 1:
+		switch number != 0 {
+		case number == 1:
 			oneItemTotal = oneItemPrice * float64(quantity)
 			total += oneItemTotal
 			toBePaid = total - (total * discount)
 			fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f|\n",
-				itemCounter, id, quantity, oneItemPrice, oneItemTotal)
-			itemCounter++
-		case itemCounter != 1 && itemCounter%2 != 0:
+				number, id, quantity, oneItemPrice, oneItemTotal)
+		case number != 1 && number%2 != 0:
 			total += oneItemTotal - oneItemTotal*promotion(promotionDiscount)
 			fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f| %5.2f|\n",
-				itemCounter, id, quantity, oneItemPrice, oneItemTotal,
+				number, id, quantity, oneItemPrice, oneItemTotal,
 				oneItemTotal*promotion(promotionDiscount))
 			toBePaid = total - (total * discount)
-			itemCounter++
 			continue
 		default:
-			fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f|\n", itemCounter, id, quantity,
+			fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f|\n", number, id, quantity,
 				oneItemPrice, oneItemTotal)
 			total += oneItemTotal
 			toBePaid = total - (total * discount)
-			itemCounter++
 		}
 	}
 	fmt.Println("________________________________________________________")
