@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -22,8 +23,10 @@ func main() {
 	//	promotionDiscount := getUserInput("Enter promotion discount (10 for exmple): ",
 	//					"Promotion discount is:")
 
-//maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount
-	printReceipt(newReceipt(10000, 10, 100, 10, 100, 10))
+	
+	//printReceipt(newReceipt(10000, 10, 100, 10, 100, 10)) //maxCardNumber, maxNumberOfItems, 
+					//maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount
+	printJsonReceipt(10000, 10, 100, 10, 100, 10)
 
 }
 
@@ -77,12 +80,12 @@ func isOddNumber(number int) bool {
 }
 
 type oneItemLine struct {
-	number       int
-	itemId       int
-	quantity     int
-	price        float64
-	numberIsOdd  bool
-	oneItemTotal float64
+	Number       int
+	ItemId       int
+	Quantity     int
+	Price        float64
+	NumberIsOdd  bool
+	OneItemTotal float64
 }
 
 func newOneItemLine(number, maxItemId, oneItemMaxQuantity, oneItemMaxPrice int) oneItemLine {
@@ -90,7 +93,7 @@ func newOneItemLine(number, maxItemId, oneItemMaxQuantity, oneItemMaxPrice int) 
 	quantity := itemQuantityGeneration(oneItemMaxQuantity)
 	price := priceGeneration(oneItemMaxPrice)
 	oneItemTotal := float64(quantity) * price
-	return oneItemLine{number: number, itemId: itemIdGeneration(maxItemId), quantity: quantity, price: price, numberIsOdd: numberIsOdd, oneItemTotal: oneItemTotal}
+	return oneItemLine{Number: number, ItemId: itemIdGeneration(maxItemId), Quantity: quantity, Price: price, NumberIsOdd: numberIsOdd, OneItemTotal: oneItemTotal}
 }
 
 func getSliceOfLines(maxItemNumber, maxItemId, oneItemMaxQuantity, oneItemMaxPrice int) []oneItemLine {
@@ -103,50 +106,60 @@ func getSliceOfLines(maxItemNumber, maxItemId, oneItemMaxQuantity, oneItemMaxPri
 }
 
 type receipt struct {
-	cardNumber   int
-	discount     float64
-	sliceOfLines []oneItemLine
-	promDiscount float64
+	CardNumber   int
+	Discount     float64
+	PromDiscount float64
+	SliceOfLines []oneItemLine
 }
 
 func newReceipt(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount int) receipt {
 	cardNumber := cardNumberGeneration(maxCardNumber)
 	discount := discountGeneration(cardNumber)
-	return receipt{cardNumber: cardNumber, discount: discount, sliceOfLines: getSliceOfLines(maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice), promDiscount: promotion(promotionDiscount)}
+	return receipt{CardNumber: cardNumber, Discount: discount, PromDiscount: promotion(promotionDiscount), SliceOfLines: getSliceOfLines(maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice)}
+}
+
+func printJsonReceipt(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount int) {
+	rec := newReceipt(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount)
+	jsonRec, err := json.MarshalIndent(rec, "", "  ")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf("%s", jsonRec)
+	}
 }
 
 func printReceipt(rec receipt) {
 	fmt.Println("___________________________________________________________________")
-	fmt.Printf("|%2s | %10s | %s| %s| %s| %s|\n",
-			"№", "ItemId", "Quantity", "Price", "Total Price", "Promotion Discount")
+	fmt.Printf("|%2s | %11s| %s| %s| %s| %s|\n",
+		"№", "ItemId", "Quantity", "Price", "Total Price", "Promotion Discount")
 	fmt.Println("___________________________________________________________________")
-	discount := rec.promDiscount
+	discount := rec.PromDiscount
 	var total float64
-	for _, line := range rec.sliceOfLines {
-		if line.number != 0 {
-			if line.numberIsOdd {
-				fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f| %18.2f|\n",
-					line.number, line.itemId, line.quantity, line.price,
-					line.oneItemTotal, line.oneItemTotal*discount)
-				total += line.oneItemTotal - line.oneItemTotal*discount
+	for _, line := range rec.SliceOfLines {
+		if line.Number != 0 {
+			if line.NumberIsOdd {
+				fmt.Printf("|%2d | %11d| %8d| %5.2f| %11.2f| %18.2f|\n",
+					line.Number, line.ItemId, line.Quantity, line.Price,
+					line.OneItemTotal, line.OneItemTotal*discount)
+				total += line.OneItemTotal - line.OneItemTotal*discount
 				continue
 			} else {
-				fmt.Printf("|%2d | %10d | %8d| %5.2f| %11.2f| %19s\n",
-				line.number, line.itemId, line.quantity, line.price,
-				line.oneItemTotal, "|")
-				total += line.oneItemTotal
+				fmt.Printf("|%2d | %11d| %8d| %5.2f| %11.2f| %19s\n",
+					line.Number, line.ItemId, line.Quantity, line.Price,
+					line.OneItemTotal, "|")
+				total += line.OneItemTotal
 			}
 		}
 	}
 	fmt.Println("___________________________________________________________________")
 	fmt.Printf("|Total: %.2f %52s\n", total, "|")
 	fmt.Println("___________________________________________________________________")
-	fmt.Printf("|Discount card: %d %47s\n", rec.cardNumber, "|")
+	fmt.Printf("|Discount card: %d %47s\n", rec.CardNumber, "|")
 	fmt.Println("___________________________________________________________________")
-	fmt.Printf("|Discount: %.0f%s %54s\n", rec.discount*100, "%", "|")
+	fmt.Printf("|Discount: %.0f%s %54s\n", rec.Discount*100, "%", "|")
 	fmt.Println("___________________________________________________________________")
 	fmt.Printf("|To be paid: %.2f; Saved: %.2f %32s\n",
-		total - total*rec.discount, total-(total-total*rec.discount), "|")
+		total-total*rec.Discount, total-(total-total*rec.Discount), "|")
 	fmt.Println("___________________________________________________________________")
 }
 
