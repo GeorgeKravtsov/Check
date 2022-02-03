@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -23,11 +25,12 @@ func main() {
 	//	promotionDiscount := getUserInput("Enter promotion discount (10 for exmple): ",
 	//					"Promotion discount is:")
 
-	rec := newReceipt(10000, 10, 100, 10, 100, 10) //maxCardNumber, maxNumberOfItems,maxItemId,
-					//oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount
-	printJsonReceipt(rec)
+	//	rec := newReceipt(10000, 10, 100, 10, 100, 10) //maxCardNumber, maxNumberOfItems,maxItemId,
+	//oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount
+	//	printJsonReceipt(rec)
+	rec := readJsonToRec("rec.json")
+	//	recJsonToFile(rec)
 	printReceipt(rec)
-
 
 }
 
@@ -142,7 +145,35 @@ func newReceipt(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, 
 	return receipt{CardNumber: cardNumber, Discount: discount, PromDiscount: promotion(promotionDiscount), SliceOfLines: getSliceOfLines(maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice)}
 }
 
-func printJsonReceipt(rec receipt) {	
+func recJsonToFile(rec receipt) {
+	jsonRec, err := json.Marshal(rec)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf("%s\n", jsonRec)
+	}
+	file, e := os.Create("rec.json")
+	if e != nil {
+		fmt.Println(e)
+		os.Exit(1)
+	} else {
+		defer file.Close()
+		file.Write(jsonRec)
+		fmt.Println("File recorded")
+	}
+}
+
+func readJsonToRec(filename string) receipt {
+	file, err := ioutil.ReadFile(filename)
+	if err != nil {
+		fmt.Println(err)
+	}
+	data := receipt{}
+	json.Unmarshal([]byte(file), &data)
+	return data
+}
+
+func printJsonReceipt(rec receipt) {
 	jsonRec, err := json.MarshalIndent(rec, "", "  ")
 	if err != nil {
 		fmt.Println(err)
