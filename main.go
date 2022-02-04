@@ -25,13 +25,12 @@ func main() {
 	//	promotionDiscount := getUserInput("Enter promotion discount (10 for exmple): ",
 	//					"Promotion discount is:")
 
-	//	rec := newReceipt(10000, 10, 100, 10, 100, 10) //maxCardNumber, maxNumberOfItems,maxItemId,
-	//oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount
+//	rec := newReceiptAuto(10000, 10, 100, 10, 100, 10) //maxCardNumber, maxNumberOfItems,maxItemId						//oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount
 	//	printJsonReceipt(rec)
-	rec := readJsonToRec("rec.json")
+//	rec := readJsonToRec("rec.json")
 	//	recJsonToFile(rec)
-	printReceipt(rec)
-
+//	printReceiptAuto(rec)
+fmt.Println(newReceipt(100, 10, 100, 10, 100, 10.0))
 }
 
 func getUserInput(message1, message2 string) int {
@@ -83,40 +82,41 @@ func isOddNumber(number int) bool {
 	return false
 }
 
-type oneItemLine struct {
+type oneItemLineAuto struct {
 	Number       int
 	ItemId       int
 	Quantity     int
 	Price        float64
-	NumberIsOdd  bool
 	OneItemTotal float64
+	NumberIsOdd  bool
+	
 }
 
-func newOneItemLine(number, maxItemId, oneItemMaxQuantity, oneItemMaxPrice int) oneItemLine {
+func newOneItemLineAuto(number, maxItemId, oneItemMaxQuantity, oneItemMaxPrice int) oneItemLineAuto {
 	numberIsOdd := isOddNumber(number)
 	quantity := itemQuantityGeneration(oneItemMaxQuantity)
 	price := priceGeneration(oneItemMaxPrice)
 	oneItemTotal := float64(quantity) * price
-	return oneItemLine{Number: number, ItemId: itemIdGeneration(maxItemId), Quantity: quantity, Price: price, NumberIsOdd: numberIsOdd, OneItemTotal: oneItemTotal}
+	return oneItemLineAuto{Number: number, ItemId: itemIdGeneration(maxItemId), Quantity: quantity, Price: price, OneItemTotal: oneItemTotal, NumberIsOdd: numberIsOdd}
 }
 
-func getSliceOfLines(maxItemNumber, maxItemId, oneItemMaxQuantity, oneItemMaxPrice int) []oneItemLine {
+func getSliceOfLinesAuto(maxItemNumber, maxItemId, oneItemMaxQuantity, oneItemMaxPrice int) []oneItemLineAuto {
 	numberOfItems := numberOfItemsInReceipt(maxItemNumber)
-	sliceOfLines := make([]oneItemLine, numberOfItems)
+	sliceOfLines := make([]oneItemLineAuto, numberOfItems)
 	for number := 1; number <= numberOfItems; number++ {
-		sliceOfLines = append(sliceOfLines, newOneItemLine(number, maxItemId, oneItemMaxQuantity, oneItemMaxPrice))
+		sliceOfLines = append(sliceOfLines, newOneItemLineAuto(number, maxItemId, oneItemMaxQuantity, oneItemMaxPrice))
 	}
 	return sliceOfLines
 }
 
-type receipt struct {
+type receiptAuto struct {
 	CardNumber   int
 	Discount     float64
 	PromDiscount float64
-	SliceOfLines []oneItemLine
+	SliceOfLines []oneItemLineAuto
 }
 
-func (rec receipt) total() float64 {
+func (rec receiptAuto) total() float64 {
 	var total float64
 	for _, line := range rec.SliceOfLines {
 		if line.Number != 0 {
@@ -131,21 +131,21 @@ func (rec receipt) total() float64 {
 	return total
 }
 
-func (rec receipt) toBePaid() float64 {
+func (rec receiptAuto) toBePaid() float64 {
 	return rec.total() - rec.total()*rec.Discount
 }
 
-func (rec receipt) saved() float64 {
+func (rec receiptAuto) saved() float64 {
 	return rec.total() - rec.toBePaid()
 }
 
-func newReceipt(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount int) receipt {
+func newReceiptAuto(maxCardNumber, maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount int) receiptAuto {
 	cardNumber := cardNumberGeneration(maxCardNumber)
 	discount := discountGeneration(cardNumber)
-	return receipt{CardNumber: cardNumber, Discount: discount, PromDiscount: promotion(promotionDiscount), SliceOfLines: getSliceOfLines(maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice)}
+	return receiptAuto{CardNumber: cardNumber, Discount: discount, PromDiscount: promotion(promotionDiscount), SliceOfLines: getSliceOfLinesAuto(maxNumberOfItems, maxItemId, oneItemMaxQuantity, oneItemMaxPrice)}
 }
 
-func recJsonToFile(rec receipt) {
+func recAutoJsonToFile(rec receiptAuto) {
 	jsonRec, err := json.Marshal(rec)
 	if err != nil {
 		fmt.Println(err)
@@ -163,17 +163,17 @@ func recJsonToFile(rec receipt) {
 	}
 }
 
-func readJsonToRec(filename string) receipt {
+func readJsonToRecAuto(filename string) receiptAuto {
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
 		fmt.Println(err)
 	}
-	data := receipt{}
+	data := receiptAuto{}
 	json.Unmarshal([]byte(file), &data)
 	return data
 }
 
-func printJsonReceipt(rec receipt) {
+func printJsonReceiptAuto(rec receiptAuto) {
 	jsonRec, err := json.MarshalIndent(rec, "", "  ")
 	if err != nil {
 		fmt.Println(err)
@@ -182,7 +182,7 @@ func printJsonReceipt(rec receipt) {
 	}
 }
 
-func printReceipt(rec receipt) {
+func printReceiptAuto(rec receiptAuto) {
 	fmt.Println("___________________________________________________________________")
 	fmt.Printf("|%2s | %11s| %s| %s| %s| %s|\n",
 		"№", "ItemId", "Quantity", "Price", "Total Price", "Promotion Discount")
@@ -228,4 +228,62 @@ func discountGeneration(cardNumber int) float64 {
 	default:
 		return 0.03
 	}
+}
+
+type oneItemLine struct {
+	Number       int
+	ItemId       int
+	Quantity     int
+	Price        float64
+	OneItemTotal float64
+	NumberIsOdd  bool
+	
+}
+
+func newOneItemLine(number, itemId, oneItemQuantity int, oneItemPrice float64) oneItemLine {
+	oneItemTotal := float64(oneItemQuantity) * oneItemPrice
+	return oneItemLine{Number: number, ItemId: itemId, Quantity: oneItemQuantity, Price: oneItemPrice, OneItemTotal: oneItemTotal, NumberIsOdd: isOddNumber(number)}
+}
+
+func getSliceOfLines(itemNumber, itemId, oneItemQuantity int, oneItemPrice float64) []oneItemLine {
+	sliceOfLines := make([]oneItemLine, itemNumber)
+	for number := 1; number <= itemNumber; number++ {
+		sliceOfLines = append(sliceOfLines, newOneItemLine(number, itemId, oneItemQuantity, oneItemPrice))
+	}
+	return sliceOfLines
+}
+
+type receipt struct {
+	CardNumber   int
+	Discount     float64
+	PromDiscount float64
+	SliceOfLines []oneItemLine
+}
+
+func (rec receipt) total() float64 {
+	var total float64
+	for _, line := range rec.SliceOfLines {
+		if line.Number != 0 {
+			if line.NumberIsOdd {
+				total += line.OneItemTotal - line.OneItemTotal*rec.PromDiscount
+				continue
+			} else {
+				total += line.OneItemTotal
+			}
+		}
+	}
+	return total
+}
+
+func (rec receipt) toBePaid() float64 {
+	return rec.total() - rec.total()*rec.Discount
+}
+
+func (rec receipt) saved() float64 {
+	return rec.total() - rec.toBePaid()
+}
+
+func newReceipt(cardNumber, numberOfItems, itemId, itemQuantity, promotionDiscount int, oneItemPrice float64 ) receipt {
+	discount := discountGeneration(cardNumber)
+	return receipt{CardNumber: cardNumber, Discount: discount, PromDiscount: promotion(promotionDiscount), SliceOfLines: getSliceOfLines(numberOfItems, itemId, itemQuantity, oneItemPrice)}
 }
