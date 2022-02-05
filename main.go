@@ -13,24 +13,25 @@ import (
 
 func main() {
 
-	//	maxCardNumber := getUserInput("Enter maximum discount card number (10000 for example) ",
-	//					"Maximum discount number is:")
-	//	maxNumberOfItems := getUserInput("Enter maximum number of items (10 for example): ",
-	//					"Maximum number of items is:")
-	//	maxItemId := getUserInput("Enter maximum item ID (100 for example): ", "Maximum item ID is:")
-	//	oneItemMaxQuantity := getUserInput("Enter maximum quantity of one item (10 for example): ",
-	//					"Maximum one item quantity is:")
-	//	oneItemMaxPrice := getUserInput("Enter maximum price of one item: (100 for example) ",
-	//					"One item maximum price is:")
-	//	promotionDiscount := getUserInput("Enter promotion discount (10 for exmple): ",
-	//					"Promotion discount is:")
+//	maxCardNumber := getUserInput("Enter maximum discount card number (10000 for example) ",
+//						"Maximum discount number is:")
+//	maxNumberOfItems := getUserInput("Enter maximum number of items (10 for example): ",
+//						"Maximum number of items is:")
+//	maxItemId := getUserInput("Enter maximum item ID (100 for example): ", "Maximum item ID is:")
+//	oneItemMaxQuantity := getUserInput("Enter maximum quantity of one item (10 for example): ",
+//						"Maximum one item quantity is:")
+//	oneItemMaxPrice := getUserInput("Enter maximum price of one item: (100 for example) ",
+//						"One item maximum price is:")
+//	promotionDiscount := getUserInput("Enter promotion discount (10 for exmple): ",
+//						"Promotion discount is:")
 
 //	rec := newReceiptAuto(10000, 10, 100, 10, 100, 10) //maxCardNumber, maxNumberOfItems,maxItemId						//oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount
 	//	printJsonReceipt(rec)
-//	rec := readJsonToRec("rec.json")
+	//	rec := readJsonToRec("rec.json")
 	//	recJsonToFile(rec)
 //	printReceiptAuto(rec)
-fmt.Println(newReceipt(100, 10, 100, 10, 100, 10.0))
+rec := newReceipt(100, 12,100,10,100,10.0)
+printReceipt(rec)	
 }
 
 func getUserInput(message1, message2 string) int {
@@ -283,7 +284,38 @@ func (rec receipt) saved() float64 {
 	return rec.total() - rec.toBePaid()
 }
 
-func newReceipt(cardNumber, numberOfItems, itemId, itemQuantity, promotionDiscount int, oneItemPrice float64 ) receipt {
+func newReceipt(cardNumber, numberOfItems, itemId, itemQuantity, promotionDiscount int, oneItemPrice float64) receipt {
 	discount := discountGeneration(cardNumber)
 	return receipt{CardNumber: cardNumber, Discount: discount, PromDiscount: promotion(promotionDiscount), SliceOfLines: getSliceOfLines(numberOfItems, itemId, itemQuantity, oneItemPrice)}
+}
+
+func printReceipt(rec receipt) {
+	fmt.Println("___________________________________________________________________")
+	fmt.Printf("|%2s | %11s| %s| %s| %s| %s|\n",
+		"№", "ItemId", "Quantity", "Price", "Total Price", "Promotion Discount")
+	fmt.Println("___________________________________________________________________")
+	for _, line := range rec.SliceOfLines {
+		if line.Number != 0 {
+			if line.NumberIsOdd {
+				fmt.Printf("|%2d | %11d| %8d| %5.2f| %11.2f| %18.2f|\n",
+					line.Number, line.ItemId, line.Quantity, line.Price,
+					line.OneItemTotal, line.OneItemTotal*rec.PromDiscount)
+				continue
+			} else {
+				fmt.Printf("|%2d | %11d| %8d| %5.2f| %11.2f| %19s\n",
+					line.Number, line.ItemId, line.Quantity, line.Price,
+					line.OneItemTotal, "|")
+			}
+		}
+	}
+	fmt.Println("___________________________________________________________________")
+	fmt.Printf("|Total: %.2f %52s\n", rec.total(), "|")
+	fmt.Println("___________________________________________________________________")
+	fmt.Printf("|Discount card: %d %47s\n", rec.CardNumber, "|")
+	fmt.Println("___________________________________________________________________")
+	fmt.Printf("|Discount: %.0f%s %54s\n", rec.Discount*100, "%", "|")
+	fmt.Println("___________________________________________________________________")
+	fmt.Printf("|To be paid: %.2f; Saved: %.2f %32s\n",
+		rec.toBePaid(), rec.saved(), "|")
+	fmt.Println("___________________________________________________________________")
 }
