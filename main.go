@@ -27,13 +27,16 @@ func main() {
 //	printReceipt(recMan)
 
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-	fmt.Fprint(writer, "Welcome Page")})
+		http.ServeFile(writer, request, "guitarshop.html")})
 
 	http.HandleFunc("/instruments", func(writer http.ResponseWriter, request *http.Request) {
-	fmt.Fprint(writer, "Instruments Pge")})
+		http.ServeFile(writer, request, "instruments.html")})
 
 	http.HandleFunc("/receipt", func(writer http.ResponseWriter, request *http.Request) {
-	fmt.Fprint(writer, "Receipt Page")})
+		http.ServeFile(writer, request, "receipt.html")})
+
+	http.HandleFunc("/autorec", func(writer http.ResponseWriter, request *http.Request) {
+		http.ServeFile(writer, request, "autorec.html")})
 
 	fmt.Println("Server is listening...")
 	http.ListenAndServe("localhost:8181", nil)
