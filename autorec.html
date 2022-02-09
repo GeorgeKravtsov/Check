@@ -13,5 +13,16 @@
 		<a href="/receipt"><button type="submit">Receipt</button></a>
 		<a href="/"><button type="submit">Home</button></a>	
 	</nav>
+<br><br><br><br><br>
+<p>{{ .CardNumber}}</p>
+<p>{{ .Discount}}</p>
+<p>{{ .PromDiscount}}</p>
+<ul>
+	{{range .SliceOfLines}}
+	<li>
+		<p>{{ .Number}}|{{ .ItemId}}|{{ .Quantity}}|{{ .Price}}|{{ .OneItemTotal}}</p>
+	</li>
+	{{end}}
+</ul>
 </body>
 </html>

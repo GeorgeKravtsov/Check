@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 )
 
@@ -19,7 +20,7 @@ func main() {
 //	promotionDiscount := getUserInput("Enter promotion discount (10 for exmple): ",
 //						"Promotion discount is:")
 
-//	recAut := newReceiptAuto(10000, 10, 100, 10, 100, 10) //maxCardNumber, maxNumberOfItems,
+	recAuto := newReceiptAuto(10000, 10, 100, 10, 100, 10) //maxCardNumber, maxNumberOfItems,
 				//maxItemId, oneItemMaxQuantity, oneItemMaxPrice, promotionDiscount
 //	printReceiptAuto(recAut)
 
@@ -30,13 +31,17 @@ func main() {
 		http.ServeFile(writer, request, "guitarshop.html")})
 
 	http.HandleFunc("/instruments", func(writer http.ResponseWriter, request *http.Request) {
-		http.ServeFile(writer, request, "instruments.html")})
+		http.ServeFile(writer, request, "instruments.html")
+	})
 
 	http.HandleFunc("/receipt", func(writer http.ResponseWriter, request *http.Request) {
-		http.ServeFile(writer, request, "receipt.html")})
+		http.ServeFile(writer, request, "receipt.html")
+	})
 
 	http.HandleFunc("/autorec", func(writer http.ResponseWriter, request *http.Request) {
-		http.ServeFile(writer, request, "autorec.html")})
+		templ, _ := template.ParseFiles("autorec.html")
+		templ.Execute(writer, recAuto)
+	})
 
 	fmt.Println("Server is listening...")
 	http.ListenAndServe("localhost:8181", nil)
